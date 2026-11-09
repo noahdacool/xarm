@@ -38,8 +38,6 @@ struct cpu *proc_setup(struct mm *mm, const struct elf *elf, const struct hargs 
     getrandom(random, 16, 0);
     gaddr_t random_addr = push_stack(mm, &sp, random, 16);
 
-    if (sp % 16) sp -= 16 - (sp % 16); // align stack to 16 bytes (all following pushes are 32-bit multiples)
-
     uint32_t auxv[32];
     int auxc = 0;
     auxv[auxc++] = AT_PHDR;     auxv[auxc++] = elf->phdr_gaddr;
@@ -57,12 +55,16 @@ struct cpu *proc_setup(struct mm *mm, const struct elf *elf, const struct hargs 
     auxv[auxc++] = AT_EGID;     auxv[auxc++] = getegid();
     auxv[auxc++] = AT_NULL;     auxv[auxc++] = 0;
 
+    int align = 16;
+    uint32_t below = (auxc + envc + argc + 3) * sizeof(uint32_t);
+    sp -= (sp - below) % align;
+
     push_stack(mm, &sp, auxv, auxc * sizeof(uint32_t));
     sp -= sizeof(uint32_t); // push four bytes of zeros
     push_stack(mm, &sp, envp_addr, envc * sizeof(gaddr_t));
     sp -= sizeof(uint32_t); // push four bytes of zeros
     push_stack(mm, &sp, argv_addr, argc * sizeof(gaddr_t));
-    push_stack(mm, &sp, &argc, sizeof(int));
+    push_stack(mm, &sp, &argc, sizeof(uint32_t));
 
     if (hargs->flags & HARGS_DEBUG) {
         // Confirm 32-bit values are pushed as little-endian
@@ -83,14 +85,16 @@ struct cpu *proc_setup(struct mm *mm, const struct elf *elf, const struct hargs 
         // Print full stack contents
         printf("\n");
         printf("[DEBUG] Stack contents (from top to bottom):\n");
-        for (gaddr_t addr = mm->stack_top - 16; addr >= sp; addr -= 16) {
+        for (gaddr_t addr = mm->stack_top; addr > sp; ) {
+            addr -= align;
             printf("[DEBUG] 0x%08x:", addr);
-            for (int i = 0; i < 16; i++) {
+            for (int i = 0; i < align; i++) {
                 printf(" %02x", mm->base[addr + i]);
             }
             printf("\n");
         }
     }
+    if (sp % align) fatal("Stack is not aligned");
 
     struct cpu *cpu = calloc(1, sizeof(struct cpu));
     if (!cpu) fatal("Out of memory");
