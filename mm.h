@@ -17,4 +17,4 @@ struct mm {
     gaddr_t brk_cur;
 };
 
-struct mm* mm_init();
+struct mm *mm_init(const struct hargs *hargs);

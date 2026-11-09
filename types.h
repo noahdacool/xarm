@@ -14,20 +14,3 @@ struct hargs {
     int gargc;
     char **gargv;
 };
-
-/*
-struct img {
-};
-
-struct emu {
-};
-
-struct cpu {
-};
-
-struct proc {
-    //struct cpu cpu;
-    //struct elf elf;
-    //struct mm mm;
-};
-*/

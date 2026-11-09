@@ -3,7 +3,7 @@
 #include "util.h"
 #include "elf.h"
 
-struct elf* elf_load(struct mm *mm, const struct hargs *hargs) {
+struct elf *elf_load(struct mm *mm, const struct hargs *hargs) {
 
     // Read ELF file
     FILE *file = fopen(hargs->path, "rb");

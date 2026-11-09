@@ -1,9 +1,10 @@
 #include <stdio.h>
-#include "mm.h"
-#include "elf.h"
+#include "util.h"
+#include "proc.h"
 
-struct hargs* parse_args(int argc, char *argv[]) {
+struct hargs *parse_args(int argc, char *argv[]) {
     struct hargs *hargs = calloc(1, sizeof(struct hargs));
+    if (!hargs) fatal("Out of memory");
 
     const char *help =
         "Usage: %s [OPTIONS] <path> [args...]\n"
@@ -41,9 +42,9 @@ struct hargs* parse_args(int argc, char *argv[]) {
 
 int main(int argc, char *argv[]) {
     struct hargs *hargs = parse_args(argc, argv);
-    struct mm *mm = mm_init();
+    struct mm *mm = mm_init(hargs);
     struct elf *elf = elf_load(mm, hargs);
-    //struct pro *pro = proc_setup(mm);
+    struct cpu *cpu = proc_setup(mm, elf, hargs);
     //struct emu *emu = xlat_program(pro);
     //struct res *res = emu_execute(emu);
     return 0;

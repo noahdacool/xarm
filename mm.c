@@ -1,8 +1,9 @@
 #include <sys/mman.h>
+#include <stdio.h>
 #include "util.h"
 #include "mm.h"
 
-struct mm* mm_init() {
+struct mm *mm_init(const struct hargs *hargs) {
     struct mm *mm = calloc(1, sizeof(struct mm));
     if (!mm) fatal("Out of memory");
     for (size_t size = GUEST_SIZE; size >= MIN_SIZE; size >>= 1) {
@@ -13,6 +14,9 @@ struct mm* mm_init() {
             mm->stack_limit = mm->stack_top - STACK_SIZE;
             mm->mmap_next = mm->stack_limit;
             break;
+        }
+        if (hargs->flags & HARGS_DEBUG) {
+            printf("[DEBUG] Failed to allocate %zu bytes of guest memory\n", size);
         }
     }
     if (mm->base == MAP_FAILED) fatal("Failed to allocate guest memory");

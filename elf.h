@@ -9,4 +9,4 @@ struct elf {
     uint16_t phentsize;
 };
 
-struct elf* elf_load(struct mm *mm, const struct hargs *hargs);
+struct elf *elf_load(struct mm *mm, const struct hargs *hargs);
