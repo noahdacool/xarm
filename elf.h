@@ -4,14 +4,29 @@
 
 #define MAX_CODE_RANGES 8
 
+struct code {
+    gaddr_t start;
+    gaddr_t end;
+};
+
+struct region {
+    gaddr_t gaddr;
+    char kind;
+};
+
+struct entaddr {
+    gaddr_t gaddr;
+    uint8_t thumb;
+};
+
 struct elf {
     gaddr_t entry;
     gaddr_t phdr_gaddr;
     uint16_t phnum;
     uint16_t phentsize;
-    struct { gaddr_t start, end; } code[MAX_CODE_RANGES];
-    struct { gaddr_t gaddr; char kind; } *regions;
-    struct { gaddr_t gaddr; uint8_t thumb; } *funcs;
+    struct code code[MAX_CODE_RANGES];
+    struct region *regions;
+    struct entaddr *funcs;
     size_t ncode;
     size_t nregions;
     size_t nfuncs;

@@ -53,7 +53,7 @@ struct elf *elf_load(struct mm *mm, const struct hargs *hargs) {
             if (p->p_flags & PF_X) {
                 if (elf->ncode == MAX_CODE_RANGES) fatal("Too many executable segments");
                 elf->code[elf->ncode].start = p->p_vaddr;
-                elf->code[elf->ncode].end   = p->p_vaddr + p->p_memsz;
+                elf->code[elf->ncode].end = p->p_vaddr + p->p_memsz;
                 elf->ncode++;
             }
             if (hargs->flags & HARGS_DEBUG) {
@@ -68,6 +68,7 @@ struct elf *elf_load(struct mm *mm, const struct hargs *hargs) {
         default: break;
         }
     }
+    if (!elf->ncode) fatal("No executable segments");
     if (!elf->phdr_gaddr) fatal("No program header segment found");
 
     // Load symbols
