@@ -5,6 +5,7 @@
 typedef uint8_t byte;
 typedef uint32_t haddr_t;
 typedef uint32_t gaddr_t;
+typedef char Elf32_Str;
 
 #define HARGS_DEBUG (1u << 0)
 
