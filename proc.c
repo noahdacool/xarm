@@ -68,31 +68,16 @@ struct cpu *proc_setup(struct mm *mm, const struct elf *elf, const struct hargs 
 
     if (hargs->flags & HARGS_DEBUG) {
         // Confirm 32-bit values are pushed as little-endian
-        printf("\n");
-        printf("[DEBUG] local argc = %08x\n", argc);
-        printf("[DEBUG] stack argc = ");
-        for (int i = 0; i < sizeof(uint32_t); i++) {
-            printf("%02x", (mm->base + sp)[i]);
-        }
-        printf("\n");
-        printf("[DEBUG] local argv_addr[0] = %08x\n", argv_addr[0]);
-        printf("[DEBUG] stack argv_addr[0] = ");
-        for (int i = 0; i < sizeof(gaddr_t); i++) {
-            printf("%02x", (mm->base + sp + sizeof(int))[i]);
-        }
-        printf("\n");
+        char buf[align * 3 + 1];
+        debug("local argc = %08x", argc);
+        debug("stack argc = %s", format_bytes(buf, mm->base + sp, sizeof(argc)));
+        debug("local argv_addr[0] = %08x", argv_addr[0]);
+        debug("stack argv_addr[0] = %s", format_bytes(buf, mm->base + sp + sizeof(argc), sizeof(argv_addr[0])));
 
         // Print full stack contents
-        printf("\n");
-        printf("[DEBUG] Stack contents (from top to bottom):\n");
-        for (gaddr_t addr = mm->stack_top; addr > sp; ) {
-            addr -= align;
-            printf("[DEBUG] 0x%08x:", addr);
-            for (int i = 0; i < align; i++) {
-                printf(" %02x", mm->base[addr + i]);
-            }
-            printf("\n");
-        }
+        debug("Stack contents (from top to bottom):");
+        for (gaddr_t addr = mm->stack_top; addr > sp; addr -= align)
+            debug("0x%08x: %s", addr - align, format_bytes(buf, mm->base + addr - align, align));
     }
     if (sp % align) fatal("Stack is not aligned");
 

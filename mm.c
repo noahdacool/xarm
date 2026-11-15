@@ -15,9 +15,7 @@ struct mm *mm_init(const struct hargs *hargs) {
             mm->mmap_next = mm->stack_limit;
             break;
         }
-        if (hargs->flags & HARGS_DEBUG) {
-            printf("[DEBUG] Failed to allocate %zu bytes of guest memory\n", size);
-        }
+        warning("Failed to allocate %zu bytes of guest memory", size);
     }
     if (mm->base == MAP_FAILED) fatal("Failed to allocate guest memory");
     if (mprotect(mm->base, NULL_GUARD, PROT_NONE) != 0) fatal("Failed to protect null guard page");

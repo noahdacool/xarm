@@ -23,8 +23,7 @@ struct hargs *parse_args(int argc, char *argv[]) {
             printf(help, argv[0]);
             exit(0);
         default:
-            fprintf(stderr, help, argv[0]);
-            exit(1);
+            fatal(help, argv[0]);
         }
     }
 
@@ -33,8 +32,7 @@ struct hargs *parse_args(int argc, char *argv[]) {
         hargs->gargc = argc - i;
         hargs->gargv = argv + i;
     } else {
-        fprintf(stderr, help, argv[0]);
-        exit(1);
+        fatal(help, argv[0]);
     }
 
     return hargs;

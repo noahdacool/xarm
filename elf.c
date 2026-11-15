@@ -7,14 +7,14 @@ struct elf *elf_load(struct mm *mm, const struct hargs *hargs) {
 
     // Read ELF file
     FILE *file = fopen(hargs->path, "rb");
-    if (!file) fatal("Failed to open ELF file");
+    if (!file) fatal("Failed to open file '%s'", hargs->path);
     fseek(file, 0, SEEK_END);
     size_t file_size = ftell(file);
     fseek(file, 0, SEEK_SET);
     byte *data = malloc(file_size);
     if (!data) { fclose(file); fatal("Failed to allocate memory for file data"); }
     size_t size = fread(data, 1, file_size, file);
-    if (size != file_size) { fclose(file); fatal("Failed to read data from file"); }
+    if (size != file_size) { fclose(file); fatal("Failed to read data from file '%s'", hargs->path); }
     fclose(file);
 
     // Verify ELF header
@@ -43,18 +43,18 @@ struct elf *elf_load(struct mm *mm, const struct hargs *hargs) {
         const Elf32_Phdr *p = &ph[i];
         switch (p->p_type) {
         case PT_LOAD:
-            if (p->p_filesz > p->p_memsz) fatal("Segment memory size is smaller than data size");
-            if (p->p_filesz > size - p->p_offset) fatal("Segment exceeds file size");
-            if (p->p_vaddr < NULL_GUARD) fatal("Segment overlaps null guard page");
-            if (p->p_vaddr > mm->stack_limit - p->p_memsz) fatal("Segment overlaps stack");
+            if (p->p_filesz > p->p_memsz) fatal("Segment '%d' memory size is smaller than data size", i);
+            if (p->p_filesz > size - p->p_offset) fatal("Segment '%d' exceeds file size", i);
+            if (p->p_vaddr < NULL_GUARD) fatal("Segment '%d' overlaps null guard page", i);
+            if (p->p_vaddr > mm->stack_limit - p->p_memsz) fatal("Segment '%d' overlaps stack", i);
             memcpy(mm->base + p->p_vaddr, data + p->p_offset, p->p_filesz);
             if (!elf->phdr_gaddr && eh->e_phoff >= p->p_offset && eh->e_phoff < p->p_offset + p->p_filesz) elf->phdr_gaddr = p->p_vaddr + (eh->e_phoff - p->p_offset);
             if (p->p_vaddr + p->p_memsz > mm->brk_start) mm->brk_start = p->p_vaddr + p->p_memsz;
             if (hargs->flags & HARGS_DEBUG) {
-                printf("[DEBUG] Loaded segment %d: vaddr=0x%08x, memsz=0x%08x, filesz=0x%08x\n", i, p->p_vaddr, p->p_memsz, p->p_filesz);
-                printf("[DEBUG] Segment data (first 16 bytes):");
-                for (int j = 0; j < 16 && j < p->p_filesz; j++) printf(" %02x", (data + p->p_offset)[j]);
-                printf("\n");
+                size_t nbytes = p->p_filesz < 16 ? p->p_filesz : 16;
+                char buf[nbytes * 3 + 1];
+                debug("Loaded segment %d: vaddr=0x%08x, memsz=0x%08x, filesz=0x%08x", i, p->p_vaddr, p->p_memsz, p->p_filesz);
+                debug("Segment data (first %lu bytes): %s", nbytes, format_bytes(buf, data + p->p_offset, nbytes));
             }
             break;
         case PT_INTERP: fatal("Dynamic linking not supported");
