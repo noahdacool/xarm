@@ -96,17 +96,10 @@ struct elf *elf_load(struct mm *mm, const struct hargs *hargs) {
             const Elf32_Sym *sym = &symtab[j];
             const Elf32_Str *str = &strtab[sym->st_name];
             if (sym->st_name >= sh_str->sh_size) warning("Symbol %lu name not in string table", j);
-            if (str[0] == '$' && (str[1] == 'a' || str[1] == 'd' || str[1] == 't') && (str[2] == '\0' || str[2] == '.')) {
-                elf->regions[elf->nregions].gaddr = sym->st_value;
-                elf->regions[elf->nregions].kind = str[1];
-                elf->nregions++;
-                if (hargs->flags & HARGS_DEBUG && elf->nregions <= 16) debug("Found mapping symbol (16 max) '0x%08x = %s'", sym->st_value, str);
-            } else if (ELF32_ST_TYPE(sym->st_info) == STT_FUNC && sym->st_shndx != SHN_UNDEF) {
-                elf->funcs[elf->nfuncs].gaddr = sym->st_value & ~1u;
-                elf->funcs[elf->nfuncs].thumb = sym->st_value & 1u;
-                elf->nfuncs++;
-                if (hargs->flags & HARGS_DEBUG && elf->nfuncs <= 8) debug("Found function symbol (8 max) '0x%08x = %b'", sym->st_value & ~1u, sym->st_value & 1u);
-            }
+            if (str[0] == '$' && (str[1] == 'a' || str[1] == 't') && (str[2] == '\0' || str[2] == '.'))
+                elf->regions[elf->nregions++] = to_gmeta(sym->st_value, str[1] == 't');
+            else if ((ELF32_ST_TYPE(sym->st_info) == STT_FUNC || ELF32_ST_TYPE(sym->st_info) == STT_GNU_IFUNC) && sym->st_shndx != SHN_UNDEF)
+                elf->funcs[elf->nfuncs++] = sym->st_value;
         }
         break;
     }

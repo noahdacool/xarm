@@ -5,30 +5,20 @@
 #define MAX_CODE_RANGES 8
 
 struct code {
-    gaddr_t start;
-    gaddr_t end;
-};
-
-struct region {
-    gaddr_t gaddr;
-    char kind;
-};
-
-struct entaddr {
-    gaddr_t gaddr;
-    uint8_t thumb;
+    gmeta_t start;
+    gmeta_t end;
 };
 
 struct elf {
-    gaddr_t entry;
+    gmeta_t entry;
     gaddr_t phdr_gaddr;
     uint16_t phnum;
     uint16_t phentsize;
     struct code code[MAX_CODE_RANGES];
-    struct region *regions;
-    struct entaddr *funcs;
     size_t ncode;
+    gmeta_t *regions;
     size_t nregions;
+    gmeta_t *funcs;
     size_t nfuncs;
 };
 

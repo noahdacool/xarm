@@ -1,13 +1,9 @@
+#pragma once
 #include "proc.h"
 
 #define MIN_INSTR_SIZE 2
 #define XBUF_FACTOR 32
 #define XBUF_MIN (1u << 20) // 1 MB
-
-struct xaddr {
-    byte *haddr;
-    uint8_t thumb;
-};
 
 struct fixaddr {
     byte *haddr;
@@ -20,10 +16,10 @@ struct xlat {
     size_t xbuf_used;
     size_t xbuf_off;
 
-    struct xaddr *amap;
+    hmeta_t *amap;
     size_t nmap;
 
-    struct entaddr *todo;
+    gmeta_t *todo;
     size_t ntodo;
     size_t todo_cap;
 
