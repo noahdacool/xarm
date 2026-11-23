@@ -16,7 +16,7 @@ struct xlat {
     size_t xbuf_used;
     size_t xbuf_off;
 
-    hmeta_t *amap;
+    byte **amap;
     size_t nmap;
 
     gmeta_t *todo;

@@ -1,6 +1,8 @@
 #pragma once
 #include "elf.h"
 
+#define CPU_REG_PC 15
+
 struct cpu {
     uint32_t reg[16];
 };

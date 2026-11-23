@@ -37,9 +37,6 @@ const char *format_bytes(char *buf, const byte *data, size_t nbytes) {
     return buf;
 }
 
-inline haddr_t haddr_of(hmeta_t hmeta) { return hmeta & ~1u; }
 inline gaddr_t gaddr_of(gmeta_t gmeta) { return gmeta & ~1u; }
-inline uint8_t ha_thumb(hmeta_t hmeta) { return hmeta &  1u; }
 inline uint8_t ga_thumb(gmeta_t gmeta) { return gmeta &  1u; }
-inline hmeta_t to_hmeta(haddr_t haddr, uint8_t thumb) { return (haddr & ~1u) | (thumb & 1u); }
 inline gmeta_t to_gmeta(gaddr_t gaddr, uint8_t thumb) { return (gaddr & ~1u) | (thumb & 1u); }
